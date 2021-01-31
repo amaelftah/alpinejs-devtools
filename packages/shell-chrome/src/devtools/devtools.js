@@ -39,7 +39,6 @@ export default function devtools() {
         latest: null,
         components: [],
         errors: [],
-        showTools: false,
         showTimeout: 1500,
         activeTheme: 'dark-header',
         loadingText: 'Alpine.js tools loading',
@@ -49,11 +48,17 @@ export default function devtools() {
 
         themes: themes,
 
-        settingsPanelEnabled: process.env.NODE_ENV !== 'production',
         settingsPanelOpen: false,
+        settings: {
+            ignoreSelector: '',
+        },
 
         tabsEnabled: process.env.NODE_ENV !== 'production',
         activeTab: 'components',
+
+        get ready() {
+            return this.settings.loaded && this.latest
+        },
 
         get isLatest() {
             if (!this.version || !this.latest) return null
@@ -96,6 +101,21 @@ export default function devtools() {
         },
 
         init() {
+            try {
+                chrome.storage.sync.get(['alpine-devtools-settings'], (result) => {
+                    result = result['alpine-devtools-settings']
+                    result.loaded = true
+                    result.error = ''
+                    Object.assign(this.settings, result)
+                    console.log(this.settings)
+                })
+            } catch (error) {
+                this.settings = {
+                    loaded: true,
+                    error: error.message,
+                }
+                console.warn(error.message, this.settings)
+            }
             this.initSplitPanes()
 
             this.$watch('activeTab', (value) => {
@@ -107,24 +127,29 @@ export default function devtools() {
                 this.scrollToLastError()
             })
 
-            this.$watch('components', () => {
-                if (!this.showTools) {
-                    fetchWithTimeout('https://registry.npmjs.com/alpinejs', { timeout: this.showTimeout })
-                        .then((data) => {
-                            this.latest = data['dist-tags'].latest
-                            this.showTools = true
-                        })
-                        .catch((_error) => {
-                            console.error('Could not load Alpine.js version data from registry.npmjs.com')
-                            // latest will be as defaulted in state.js
-                            this.showTools = true
-                        })
-                }
-            })
+            fetchWithTimeout('https://registry.npmjs.com/alpinejs', { timeout: this.showTimeout })
+                .then((data) => {
+                    this.latest = data['dist-tags'].latest
+                })
+                .catch((_error) => {
+                    console.error('Could not load Alpine.js version data from registry.npmjs.com')
+                })
 
             this.$watch('orientation', () => {
                 this.initSplitPanes()
             })
+
+            this.$watch('settings', (value) => {
+                chrome.storage.sync.set({ 'alpine-devtools-settings': JSON.parse(JSON.stringify(value)) }, () => {
+                    console.log('Settings updated', JSON.parse(JSON.stringify(value)))
+                })
+            })
+        },
+
+        updateSetting(name, value) {
+            const settings = this.settings
+            settings[name] = value
+            this.settings = settings
         },
 
         initSplitPanes() {

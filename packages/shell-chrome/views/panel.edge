@@ -13,9 +13,17 @@
     </head>
 
     <body class="antialiased">
-        <div x-data x-show="false" class="preload">Devtools loading...</div>
+        <div data-testid="panel-root" x-data x-show="false" class="preload">Devtools loading...</div>
 
-        <div id="app" class="h-full" x-cloak x-data="devtools()" x-init="init()" x-spread="devtoolsRootDirectives()">
+        <div
+            id="app"
+            data-testid="panel-root"
+            class="h-full"
+            x-cloak
+            x-data="devtools()"
+            x-init="init()"
+            x-spread="devtoolsRootDirectives()"
+        >
             <div class="bg-white flex flex-col relative h-full w-full mx-auto">
                 @include('_partials.header')
 
@@ -37,7 +45,7 @@
 
                 @include('_partials.footer')
 
-                @include('_partials.settings')
+                @include('settings.index')
             </div>
         </div>
         <script src="./panel.js"></script>

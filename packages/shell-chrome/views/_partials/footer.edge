@@ -1,5 +1,5 @@
 <div
-    x-show="showTools"
+    x-show="ready"
     class="flex font-bold text-gray-400 border-t border-gray-300 bg-white"
 >
     <div class="flex-1">
@@ -12,13 +12,13 @@
                         <span x-text="`${components.length} ${components.length > 1 || components.length == 0? 'components' : 'component'}`"></span>
                         @endverbatim
                     </a>
-                    
+
                     @if(devOnly)
                         ,&nbsp;
-                        <a 
-                            href="#" 
-                            data-testid="footer-warnings-link" 
-                            @click.prevent="activeTab = 'warnings'" 
+                        <a
+                            href="#"
+                            data-testid="footer-warnings-link"
+                            @click.prevent="activeTab = 'warnings'"
                             :class="{
                                 'text-red-400': errors.length > 0
                             }"
@@ -39,8 +39,8 @@
             >
                 <svg
                     :class="{
-                            'text-green-500': showTools && isLatest,
-                            'text-orange-500': showTools && !isLatest,
+                            'text-green-500': ready && isLatest,
+                            'text-orange-500': ready && !isLatest,
                         }"
                     class="mr-1.5 h-2 w-2 transition transition-colors duration-700 ease-in-out"
                     fill="currentColor"
@@ -94,7 +94,6 @@
         <button
             data-testid="settings-panel-open-button"
             class="hover:opacity-75 focus:outline-none"
-            x-show="settingsPanelEnabled"
             @click="settingsPanelOpen = true"
         >
             <svg
